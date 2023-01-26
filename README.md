@@ -1,19 +1,17 @@
 # SWERC Presenter
 
-1. Download a sample PDF presentation
-
+1. Install dependencies
 ```sh
-wget -O sample.pdf "https://github.com/fuljo/flaTLAnd/releases/latest/download/tla_slides.pdf"
+npm install
 ```
 
-2. Start a file server
+2. Download a sample PDF presentation
 
 ```sh
-caddy file-server --listen 0.0.0.0:3000
-```
-or 
-```sh
- python -m http.server --bind 0.0.0.0 3000 
+wget -O dist/sample.pdf "https://github.com/fuljo/flaTLAnd/releases/latest/download/tla_slides.pdf"
 ```
 
-3. Preview the site [http://localhost:3000/viewer.html](http://localhost:3000/viewer.html)
+3. Run a test server on [http://localhost:3000/](http://localhost:3000/)
+   ```sh
+   npm start
+   ```
