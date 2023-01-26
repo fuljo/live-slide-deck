@@ -31,12 +31,10 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
 // Some PDFs need external cmaps.
 //
-const CMAP_URL = "pdfjs-dist/cmaps/";
-const CMAP_PACKED = false; // TODO: enable this
+const CMAP_URL = "cmaps/";
+const CMAP_PACKED = true;
 
 const DEFAULT_URL = "sample.pdf";
-// To test the AcroForm and/or scripting functionality, try e.g. this file:
-// "../../test/pdfs/160F-2019.pdf"
 
 const ENABLE_XFA = true;
 const SEARCH_FOR = ""; // try "Mozilla";

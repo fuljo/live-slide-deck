@@ -1,6 +1,7 @@
 const webpack = require("webpack"); // eslint-disable-line no-unused-vars
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
     mode: "development",
@@ -18,6 +19,14 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: "src/index.html",
         }),
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: path.join(path.dirname(require.resolve('pdfjs-dist/package.json')), 'cmaps'),
+                    to: 'cmaps',
+                }
+            ]
+        }),
     ],
     mode: "none",
     output: {
@@ -30,7 +39,7 @@ module.exports = {
             {
                 test: /\.css$/i,
                 use: ["style-loader", "css-loader"],
-            }
+            },
         ]
     },
     optimization: {
