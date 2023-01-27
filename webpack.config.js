@@ -2,9 +2,9 @@ const webpack = require("webpack"); // eslint-disable-line no-unused-vars
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const Dotenv = require("dotenv-webpack");
 
 module.exports = {
-    mode: "development",
     context: __dirname,
     entry: {
         main: "./src/index.js",
@@ -27,12 +27,16 @@ module.exports = {
                 }
             ]
         }),
+        new Dotenv({
+            path: "./.env",
+            safe: true,
+        }),
     ],
     mode: "none",
     output: {
         path: path.join(__dirname, "dist"),
         filename: "[name].bundle.js",
-        // clean: true,
+        clean: true,
     },
     module: {
         rules: [

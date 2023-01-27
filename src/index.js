@@ -1,24 +1,20 @@
-/* Copyright 2014 Mozilla Foundation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-"use strict";
-
 import * as pdfjsLib from 'pdfjs-dist/webpack';
 import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer';
 import './style.css';
 import 'pdfjs-dist/web/pdf_viewer.css';
+
+import { initializeApp } from "firebase/app";
+import { getFirestore, doc, getDoc, onSnapshot, Firestore } from "firebase/firestore";
+
+// Web app Firebase configuration
+const firebaseConfig = {
+    apiKey: process.env.FIREBASE_API_KEY,
+    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.FIREBASE_APP_ID,
+};
 
 if (!pdfjsLib.getDocument || !pdfjsViewer.PDFSinglePageViewer) {
     // eslint-disable-next-line no-alert
@@ -30,18 +26,20 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     "pdf.worker.bundle.js";
 
 // Some PDFs need external cmaps.
-//
 const CMAP_URL = "cmaps/";
 const CMAP_PACKED = true;
 
-const DEFAULT_URL = "sample.pdf";
-
 const ENABLE_XFA = true;
-const SEARCH_FOR = ""; // try "Mozilla";
 
-// const SANDBOX_BUNDLE_SRC = "pdfjs-dist/build/pdf.sandbox.js";
+// String identifier of the current deck.
+var currentDeck = null;
 
-window.addEventListener("DOMContentLoaded", function () {
+/**
+ * Create the single-page viewer.
+ * 
+ * @returns {pdfjsViewer.PDFSinglePageViewer} The viewer.
+ */
+function createViewer() {
     const container = document.getElementById("viewerContainer");
 
     const eventBus = new pdfjsViewer.EventBus();
@@ -51,59 +49,91 @@ window.addEventListener("DOMContentLoaded", function () {
         eventBus,
     });
 
-    // (Optionally) enable find controller.
-    const pdfFindController = new pdfjsViewer.PDFFindController({
-        eventBus,
-        linkService: pdfLinkService,
-    });
-
-    // (Optionally) enable scripting support.
-    // const pdfScriptingManager = new pdfjsViewer.PDFScriptingManager({
-    //     eventBus,
-    //     sandboxBundleSrc: SANDBOX_BUNDLE_SRC,
-    // });
-
     const pdfSinglePageViewer = new pdfjsViewer.PDFSinglePageViewer({
         container,
         eventBus,
         linkService: pdfLinkService,
-        findController: pdfFindController,
-        // scriptingManager: pdfScriptingManager,
         removePageBorders: true,
     });
     pdfLinkService.setViewer(pdfSinglePageViewer);
-    // pdfScriptingManager.setViewer(pdfSinglePageViewer);
 
-    eventBus.on("pagesinit", function () {
-        // We can use pdfSinglePageViewer now, e.g. let's change default scale.
+    eventBus.on("pagesinit", () => {
+        // Fit the page into the frame.
         pdfSinglePageViewer.currentScaleValue = "page-fit";
-
-        // We can try searching for things.
-        if (SEARCH_FOR) {
-            eventBus.dispatch("find", { type: "", query: SEARCH_FOR });
-        }
-    });
-
-    // Loading document.
-    const loadingTask = pdfjsLib.getDocument({
-        url: DEFAULT_URL,
-        cMapUrl: CMAP_URL,
-        cMapPacked: CMAP_PACKED,
-        enableXfa: ENABLE_XFA,
-    });
-    loadingTask.promise.then(function (pdfDocument) {
-        // Document loaded, specifying document for the viewer and
-        // the (optional) linkService.
-        pdfSinglePageViewer.setDocument(pdfDocument);
-
-        pdfLinkService.setDocument(pdfDocument, null);
     });
 
     // Add event listeners
-    window.addEventListener('keydown', function (e) {
+    window.addEventListener('keydown', (e) => {
         switch (e.key) {
             case 'ArrowLeft': pdfSinglePageViewer.previousPage(); break;
             case 'ArrowRight': pdfSinglePageViewer.nextPage(); break;
         }
     }, false);
+
+    return pdfSinglePageViewer;
+}
+
+/**
+ * Load the document into the viewer.
+ * @param {pdfjsViewer.PDFSinglePageViewer} viewer 
+ * @param {string} url 
+ * @returns pdfjsLib.PDFDocumentProxy
+ */
+async function loadDocument(viewer, url) {
+    // Loading document.
+    const loadingTask = pdfjsLib.getDocument({
+        url,
+        cMapUrl: CMAP_URL,
+        cMapPacked: CMAP_PACKED,
+        enableXfa: ENABLE_XFA,
+    });
+    const pdfDocument = await loadingTask.promise;
+    // Document loaded, specifying document for the viewer and the linkService.
+    viewer.setDocument(pdfDocument);
+    viewer.setDocument(pdfDocument, null);
+    return pdfDocument;
+}
+
+/**
+ * Load the deck into the viewer.
+ * @param {pdfjsViewer.pdfSinglePageViewer} viewer 
+ * @param {Firestore} db 
+ * @param {string} id of the slide deck
+ */
+async function updateDeck(viewer, db, deck) {
+    const deckRef = doc(db, 'decks', deck);
+    const deckDoc = await getDoc(deckRef);
+    if (!deckDoc.exists()) {
+        throw new Error(`Deck ${deck} does not exist.`);
+    } else {
+        loadDocument(viewer, deckDoc.data().url);
+    }
+}
+
+// Main
+window.addEventListener("DOMContentLoaded", () => {
+    // Create the single-page viewer.
+    const viewer = createViewer();
+
+    // Initialize the Firebase app
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Set callback for data changes
+    const unsub = onSnapshot(doc(db, "presenter", "config"), (doc) => {
+        const data = doc.data();
+        
+        if (currentDeck != data.currentDeck) {
+            // Load new deck
+            updateDeck(viewer, db, data.currentDeck).then(() => {
+                currentDeck = data.currentDeck;
+                viewer.currentPageNumber = data.currentPageNumber;
+            }).catch((error) => {
+                console.error("Error loading document: ", error);    
+            });
+        } else if (viewer.currentPageNumber != data.currentPageNumber) {
+            // Update current page
+            viewer.currentPageNumber = data.currentPageNumber;
+        }
+    });
 });
