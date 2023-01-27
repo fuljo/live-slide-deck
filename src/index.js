@@ -33,6 +33,7 @@ const ENABLE_XFA = true;
 
 // String identifier of the current deck.
 var currentDeck = null;
+var currentPageNumber = 1;
 
 /**
  * Create the single-page viewer.
@@ -106,7 +107,7 @@ async function updateDeck(viewer, db, deck) {
     if (!deckDoc.exists()) {
         throw new Error(`Deck ${deck} does not exist.`);
     } else {
-        loadDocument(viewer, deckDoc.data().url);
+        await loadDocument(viewer, deckDoc.data().url);
     }
 }
 
@@ -115,6 +116,11 @@ window.addEventListener("DOMContentLoaded", () => {
     // Create the single-page viewer.
     const viewer = createViewer();
 
+    viewer.eventBus.on("pagesinit", () => {
+        // Set the initial page number once the document is initializing.
+        viewer.currentPageNumber = currentPageNumber;
+    });
+
     // Initialize the Firebase app
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -122,18 +128,21 @@ window.addEventListener("DOMContentLoaded", () => {
     // Set callback for data changes
     const unsub = onSnapshot(doc(db, "presenter", "config"), (doc) => {
         const data = doc.data();
-        
-        if (currentDeck != data.currentDeck) {
+        const remoteDeck = data.currentDeck;
+        const remotePage = parseInt(data.currentPageNumber);
+
+        if (currentDeck != remoteDeck) {
             // Load new deck
-            updateDeck(viewer, db, data.currentDeck).then(() => {
-                currentDeck = data.currentDeck;
-                viewer.currentPageNumber = data.currentPageNumber;
+            updateDeck(viewer, db, remoteDeck).then(() => {
+                currentDeck = remoteDeck;
             }).catch((error) => {
-                console.error("Error loading document: ", error);    
+                console.error("Error loading document: ", error);
             });
-        } else if (viewer.currentPageNumber != data.currentPageNumber) {
+        }
+        if (currentPageNumber != remotePage) {
             // Update current page
-            viewer.currentPageNumber = data.currentPageNumber;
+            currentPageNumber = remotePage;
+            viewer.currentPageNumber = remotePage; // this only works if the pages have already loaded
         }
     });
 });
