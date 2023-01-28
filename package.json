@@ -5,22 +5,29 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
-    "start": "webpack serve --open"
+    "start": "webpack serve --open --mode development"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "autoprefixer": "^10.4.13",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.3",
     "dotenv-webpack": "^8.0.1",
     "html-webpack-plugin": "^5.5.0",
+    "postcss-loader": "^7.0.2",
+    "sass": "^1.57.1",
+    "sass-loader": "^13.2.0",
     "style-loader": "^3.3.1",
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.1",
     "webpack-dev-server": "^4.11.1"
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.6",
+    "bootstrap": "^5.2.3",
+    "bootstrap-icons": "^1.10.3",
     "firebase": "^9.16.0",
     "pdfjs-dist": "^3.2.146"
   }

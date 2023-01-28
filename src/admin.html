@@ -1,0 +1,43 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWERC Presenter - Admin</title>
+</head>
+
+<body>
+    <header
+        class="d-flex bg-light align-items-baseline justify-content-center justify-content-md-between py-3 border-bottom">
+        <div class="container-fluid row d-flex flex-wrap gy-2 gy-md-0 align-items-baseline">
+            <div class="d-flex align-items-baseline col-md-3 gap-2 justify-content-center justify-content-md-start text-dark text-decoration-none">
+                <i class="bi-file-slides-fill align-self-center" role="img" id="logo"></i>
+                <div class="d-flex col-md-8">
+                    <select id="deckName" class="form-select">
+                        <option value="one">One</option>
+                        <option value="two">Two</option>
+                        <option value="three">Three</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center justify-content-center col-md-6 gap-2">
+                <button id="prevPage" type="button" class="btn btn-primary"><i class="bi bi-chevron-left"></i></button>
+                <input id="pageNumber" type="number" name="pageNumber" class="form-control d-inline-block" value="1"> /
+                <span id="pageCount">5</span>
+                <button id="nextPage" type="button" class="btn btn-primary"><i class="bi bi-chevron-right"></i></button>
+            </div>
+
+            <div class="d-flex col-md-3 gap-2 justify-content-center justify-content-md-end">
+                <button type="button" class="btn btn-outline-primary">Login</button>
+                <button type="button" class="btn btn-primary">Sign-up</button>
+            </div>
+        </div>
+    </header>
+    <div id="viewerContainer" class="with-toolbar">
+        <div id="viewer" class="pdfViewer"></div>
+    </div>
+</body>
+
+</html>

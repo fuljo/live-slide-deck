@@ -7,7 +7,8 @@ const Dotenv = require("dotenv-webpack");
 module.exports = {
     context: __dirname,
     entry: {
-        main: "./src/index.js",
+        main: "./src/js/index.js",
+        admin: "./src/js/admin.js",
         "pdf.worker": "pdfjs-dist/build/pdf.worker.entry",
     },
     devtool: "source-map",
@@ -17,7 +18,14 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
+            filename: "index.html",
             template: "src/index.html",
+            chunks: ["main"],
+        }),
+        new HtmlWebpackPlugin({
+            filename: "admin.html",
+            template: "src/admin.html",
+            chunks: ["admin"],
         }),
         new CopyWebpackPlugin({
             patterns: [
@@ -41,9 +49,38 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.css$/i,
-                use: ["style-loader", "css-loader"],
+                test: /\.(css)$/,
+                use: ['style-loader', 'css-loader'],
             },
+            {
+                test: /\.(scss)$/i,
+                use: [
+                    {
+                        loader: 'style-loader'
+                    },
+                    {
+                        loader: 'css-loader'
+                    },
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            postcssOptions: {
+                                plugins: () => [
+                                    require('autoprefixer')
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        loader: 'sass-loader'
+                    }
+                ],
+            },
+            {
+                test: /\.woff(2)?(\?)?(\w)?$/,
+                include: path.resolve(__dirname, './node_modules/bootstrap-icons/font/fonts'),
+                type: 'asset/resource',
+            }
         ]
     },
     optimization: {

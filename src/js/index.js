@@ -1,7 +1,7 @@
 import * as pdfjsLib from 'pdfjs-dist/webpack';
 import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer';
-import './style.css';
 import 'pdfjs-dist/web/pdf_viewer.css';
+import '../scss/style.scss';
 
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, getDoc, onSnapshot, Firestore } from "firebase/firestore";
@@ -146,3 +146,11 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
+export {
+    pdfjsLib,
+    pdfjsViewer,
+    firebaseConfig,
+    createViewer,
+    updateDeck,
+}
