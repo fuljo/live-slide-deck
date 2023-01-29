@@ -4,7 +4,7 @@ import 'pdfjs-dist/web/pdf_viewer.css';
 import '../scss/style.scss';
 
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, getDoc, onSnapshot, Firestore } from "firebase/firestore";
+import { getFirestore, doc, getDoc, onSnapshot, Firestore, DocumentSnapshot } from "firebase/firestore";
 
 // Web app Firebase configuration
 const firebaseConfig = {
@@ -18,7 +18,7 @@ const firebaseConfig = {
 
 if (!pdfjsLib.getDocument || !pdfjsViewer.PDFSinglePageViewer) {
     // eslint-disable-next-line no-alert
-    alert("Please build the pdfjs-dist library using\n  `gulp dist-install`");
+    alert("Please provide the `pdfjs-dist` library");
 }
 
 // Setting worker path to worker bundle.
@@ -31,126 +31,147 @@ const CMAP_PACKED = true;
 
 const ENABLE_XFA = true;
 
-// String identifier of the current deck.
-var currentDeck = null;
-var currentPageNumber = 1;
+class ViewerApp {
+    /** @type {HTMLElement} */
+    viewerContainer;
+    /** @type {pdfjsViewer.PDFSinglePageViewer} */
+    viewer;
+    /** @type {pdfjsViewer.EventBus} */
+    eventBus;
+    /** @type {pdfjsViewer.PDFLinkService} */
+    pdfLinkService;
+    /** @type {import('firebase/app').FirebaseApp} */
+    app;
+    /** @type {Firestore} */
+    db;
+    /**
+     * Name of the current deck.
+     * @type {string}
+     */
+    currentDeck;
+    /** @type {number} */
+    currentPageNumber;
 
-/**
- * Create the single-page viewer.
- * 
- * @returns {pdfjsViewer.PDFSinglePageViewer} The viewer.
- */
-function createViewer() {
-    const container = document.getElementById("viewerContainer");
+    /**
+     * Create a new viewer app.
+     * 
+     * We suppose that the DOM has already been loaded so we can query elements.
+     * @param {HTMLElement} viewerContainer 
+     * @param {Object} firebaseConfig 
+     */
+    constructor(viewerContainer, firebaseConfig) {
+        this.viewerContainer = viewerContainer;
+        this.currentDeck = null;
+        this.currentPageNumber = 1;
 
-    const eventBus = new pdfjsViewer.EventBus();
+        this.eventBus = new pdfjsViewer.EventBus();
 
-    // (Optionally) enable hyperlinks within PDF files.
-    const pdfLinkService = new pdfjsViewer.PDFLinkService({
-        eventBus,
-    });
+        // Enable hyperlinks within PDF files.
+        // TODO: debug hyperlinks.
+        this.pdfLinkService = new pdfjsViewer.PDFLinkService({
+            eventBus: this.eventBus,
+        });
 
-    const pdfSinglePageViewer = new pdfjsViewer.PDFSinglePageViewer({
-        container,
-        eventBus,
-        linkService: pdfLinkService,
-        removePageBorders: true,
-    });
-    pdfLinkService.setViewer(pdfSinglePageViewer);
+        this.viewer = new pdfjsViewer.PDFSinglePageViewer({
+            container: this.viewerContainer,
+            eventBus: this.eventBus,
+            linkService: this.pdfLinkService,
+            removePageBorders: true,
+        });
+        this.pdfLinkService.setViewer(this.viewer);
 
-    eventBus.on("pagesinit", () => {
-        // Fit the page into the frame.
-        pdfSinglePageViewer.currentScaleValue = "page-fit";
-    });
+        this.eventBus.on("pagesinit", () => {
+            // Fit the page into the frame.
+            this.viewer.currentScaleValue = "page-fit";
+        });
 
-    // Add event listeners
-    window.addEventListener('keydown', (e) => {
-        switch (e.key) {
-            case 'ArrowLeft': pdfSinglePageViewer.previousPage(); break;
-            case 'ArrowRight': pdfSinglePageViewer.nextPage(); break;
+        // Add event listeners
+        window.addEventListener('keydown', (e) => {
+            switch (e.key) {
+                case 'ArrowLeft': this.viewer.previousPage(); break;
+                case 'ArrowRight': this.viewer.nextPage(); break;
+            }
+        }, false);
+
+        // Initialize the Firebase app
+        this.app = initializeApp(firebaseConfig);
+        this.db = getFirestore(this.app);
+
+        // Set callback for data changes
+        const unsub = onSnapshot(doc(this.db, "presenter", "config"), this.#onSnapshot.bind(this));
+    }
+
+    /**
+     * Handle a change in the presenter's data.
+     * @param {DocumentSnapshot<import('firebase/firestore').DocumentData>} doc the changed firestore document.
+     */
+    #onSnapshot(doc) {
+        const data = doc.data();
+        const remoteDeck = data.currentDeck;
+        const remotePage = parseInt(data.currentPageNumber);
+
+        if (this.currentDeck != remoteDeck) {
+            // Load new deck
+            this.#updateDeck(remoteDeck).then(() => {
+                this.currentDeck = remoteDeck;
+            }).catch((error) => {
+                console.error("Error loading document: ", error);
+            });
         }
-    }, false);
+        if (this.currentPageNumber != remotePage) {
+            // Update current page
+            this.currentPageNumber = remotePage;
+            this.viewer.currentPageNumber = remotePage; // this only works if the viewer has finished initializing.
+        }
+    }
 
-    return pdfSinglePageViewer;
-}
+    /**
+     * Update the deck shown in the viewer.
+     * @param {string} deck the name of the deck to load. 
+     */
+    async #updateDeck(deck) {
+        const deckRef = doc(this.db, 'decks', deck);
+        const deckDoc = await getDoc(deckRef);
+        if (!deckDoc.exists()) {
+            throw new Error(`Deck ${deck} does not exist.`);
+        } else {
+            await this.loadDocument(deckDoc.data().url);
+        }
+    }
 
-/**
- * Load the document into the viewer.
- * @param {pdfjsViewer.PDFSinglePageViewer} viewer 
- * @param {string} url 
- * @returns pdfjsLib.PDFDocumentProxy
- */
-async function loadDocument(viewer, url) {
-    // Loading document.
-    const loadingTask = pdfjsLib.getDocument({
-        url,
-        cMapUrl: CMAP_URL,
-        cMapPacked: CMAP_PACKED,
-        enableXfa: ENABLE_XFA,
-    });
-    const pdfDocument = await loadingTask.promise;
-    // Document loaded, specifying document for the viewer and the linkService.
-    viewer.setDocument(pdfDocument);
-    viewer.setDocument(pdfDocument, null);
-    return pdfDocument;
-}
-
-/**
- * Load the deck into the viewer.
- * @param {pdfjsViewer.pdfSinglePageViewer} viewer 
- * @param {Firestore} db 
- * @param {string} id of the slide deck
- */
-async function updateDeck(viewer, db, deck) {
-    const deckRef = doc(db, 'decks', deck);
-    const deckDoc = await getDoc(deckRef);
-    if (!deckDoc.exists()) {
-        throw new Error(`Deck ${deck} does not exist.`);
-    } else {
-        await loadDocument(viewer, deckDoc.data().url);
+    /**
+     * Load the document into the viewer.
+     * @param {string} url url of the document to load.
+     * @returns pdfjsLib.PDFDocumentProxy
+     */
+    async loadDocument(url) {
+        // Loading document.
+        const loadingTask = pdfjsLib.getDocument({
+            url,
+            cMapUrl: CMAP_URL,
+            cMapPacked: CMAP_PACKED,
+            enableXfa: ENABLE_XFA,
+        });
+        const pdfDocument = await loadingTask.promise;
+        // Document loaded, specifying document for the viewer and the linkService.
+        this.viewer.setDocument(pdfDocument);
+        this.viewer.setDocument(pdfDocument, null);
+        return pdfDocument;
     }
 }
 
 // Main
 window.addEventListener("DOMContentLoaded", () => {
-    // Create the single-page viewer.
-    const viewer = createViewer();
+    // Get the viewer container
+    const viewerContainer = document.getElementById("viewerContainer");
 
-    viewer.eventBus.on("pagesinit", () => {
-        // Set the initial page number once the document is initializing.
-        viewer.currentPageNumber = currentPageNumber;
-    });
-
-    // Initialize the Firebase app
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // Set callback for data changes
-    const unsub = onSnapshot(doc(db, "presenter", "config"), (doc) => {
-        const data = doc.data();
-        const remoteDeck = data.currentDeck;
-        const remotePage = parseInt(data.currentPageNumber);
-
-        if (currentDeck != remoteDeck) {
-            // Load new deck
-            updateDeck(viewer, db, remoteDeck).then(() => {
-                currentDeck = remoteDeck;
-            }).catch((error) => {
-                console.error("Error loading document: ", error);
-            });
-        }
-        if (currentPageNumber != remotePage) {
-            // Update current page
-            currentPageNumber = remotePage;
-            viewer.currentPageNumber = remotePage; // this only works if the pages have already loaded
-        }
-    });
+    // Createv and initialize the viewer app
+    const app = new ViewerApp(viewerContainer, firebaseConfig);
 });
 
 export {
     pdfjsLib,
     pdfjsViewer,
     firebaseConfig,
-    createViewer,
-    updateDeck,
-}
+    ViewerApp,
+};
