@@ -48,9 +48,9 @@ class ViewerApp {
      * Name of the current deck.
      * @type {string}
      */
-    currentDeck;
+    _currentDeck;
     /** @type {number} */
-    currentPageNumber;
+    _currentPageNumber;
 
     /**
      * Create a new viewer app.
@@ -61,8 +61,6 @@ class ViewerApp {
      */
     constructor(viewerContainer, firebaseConfig) {
         this.viewerContainer = viewerContainer;
-        this.currentDeck = null;
-        this.currentPageNumber = 1;
 
         this.eventBus = new pdfjsViewer.EventBus();
 
@@ -83,36 +81,51 @@ class ViewerApp {
         this.eventBus.on("pagesinit", () => {
             // Fit the page into the frame.
             this.viewer.currentScaleValue = "page-fit";
-        });
-
-        // Add event listeners
-        window.addEventListener('keydown', (e) => {
-            switch (e.key) {
-                case 'ArrowLeft': this.viewer.previousPage(); break;
-                case 'ArrowRight': this.viewer.nextPage(); break;
-            }
-        }, false);
+            // Go to the current page.
+            this.viewer.currentPageNumber = this.currentPageNumber || 1;
+        });       
 
         // Initialize the Firebase app
         this.app = initializeApp(firebaseConfig);
         this.db = getFirestore(this.app);
 
         // Set callback for data changes
-        const unsub = onSnapshot(doc(this.db, "presenter", "config"), this.#onSnapshot.bind(this));
+        const unsub = onSnapshot(doc(this.db, "presenter", "state"), this._onSnapshot.bind(this));
+    }
+
+    get currentDeck() {
+        return this._currentDeck;
+    }
+
+    set currentDeck(deckName) {
+        this._currentDeck = deckName;
+    }
+
+    get currentPageNumber() {
+        return this._currentPageNumber;
+    }
+
+    set currentPageNumber(pageNumber) {
+        if (Number.isInteger(pageNumber) && pageNumber > 0) {
+            this._currentPageNumber = pageNumber;
+            this.viewer.currentPageNumber = pageNumber; // this only works if the viewer has finished initializing.
+        } else {
+            console.error(`Invalid page number: ${pageNumber}`);
+        }
     }
 
     /**
      * Handle a change in the presenter's data.
      * @param {DocumentSnapshot<import('firebase/firestore').DocumentData>} doc the changed firestore document.
      */
-    #onSnapshot(doc) {
+    _onSnapshot(doc) {
         const data = doc.data();
         const remoteDeck = data.currentDeck;
         const remotePage = parseInt(data.currentPageNumber);
 
         if (this.currentDeck != remoteDeck) {
             // Load new deck
-            this.#updateDeck(remoteDeck).then(() => {
+            this._updateDeck(remoteDeck).then(() => {
                 this.currentDeck = remoteDeck;
             }).catch((error) => {
                 console.error("Error loading document: ", error);
@@ -121,7 +134,6 @@ class ViewerApp {
         if (this.currentPageNumber != remotePage) {
             // Update current page
             this.currentPageNumber = remotePage;
-            this.viewer.currentPageNumber = remotePage; // this only works if the viewer has finished initializing.
         }
     }
 
@@ -129,7 +141,7 @@ class ViewerApp {
      * Update the deck shown in the viewer.
      * @param {string} deck the name of the deck to load. 
      */
-    async #updateDeck(deck) {
+    async _updateDeck(deck) {
         const deckRef = doc(this.db, 'decks', deck);
         const deckDoc = await getDoc(deckRef);
         if (!deckDoc.exists()) {
