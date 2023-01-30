@@ -9,6 +9,7 @@ module.exports = {
     entry: {
         main: "./src/js/index.js",
         admin: "./src/js/admin.js",
+        login: "./src/js/login.js",
         "pdf.worker": "pdfjs-dist/build/pdf.worker.entry",
     },
     devtool: "source-map",
@@ -26,6 +27,11 @@ module.exports = {
             filename: "admin.html",
             template: "src/admin.html",
             chunks: ["admin"],
+        }),
+        new HtmlWebpackPlugin({
+            filename: "login.html",
+            template: "src/login.html",
+            chunks: ["login"],
         }),
         new CopyWebpackPlugin({
             patterns: [

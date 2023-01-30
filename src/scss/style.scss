@@ -30,18 +30,18 @@ header {
 }
 
 #logo {
-    font-size: 2em;
+    font-size: 2rem;
 }
 
 #pageNumber {
     -moz-appearance: textfield;
     appearance: textfield;
     text-align: center;
-    width: 4rem;
+    // width: 4rem;
 }
 
 #pageCount {
-    padding: 0 1rem;
+    // padding: 0 1rem;
 }
 
 input[type='number']::-webkit-inner-spin-button,

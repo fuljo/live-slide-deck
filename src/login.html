@@ -1,0 +1,32 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWERC Presenter - Admin login</title>
+</head>
+
+<body class="text-center bg-light">
+    <main class="form-signin">
+        <form id="loginForm">
+            <i class="h1 bi-file-slides-fill align-self-center" role="img" id="logo"></i>
+            <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
+
+            <div class="form-floating">
+                <input name="email" type="email" class="form-control" id="emailInput" placeholder="name@example.com">
+                <label for="emailInput">Email address</label>
+            </div>
+            <div class="form-floating">
+                <input name="password" type="password" class="form-control" id="passwordInput" placeholder="Password">
+                <label for="passwordInput">Password</label>
+            </div>
+
+            <button id="loginButton" class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
+
+            <div id="loginError" class="alert alert-danger mt-3" role="alert" hidden></div>
+        </form>
+    </main>
+</body>
+
+</html>
