@@ -77,6 +77,9 @@ class ViewerApp {
             this.viewer.currentPageNumber = this.currentPageNumber || 1;
         });
 
+        this.resizeObserver = new ResizeObserver(this._onResize.bind(this));
+        this.resizeObserver.observe(this.viewerContainer);
+
         // Initialize the Firebase app
         this.app = initializeApp(firebaseConfig);
         this.db = getFirestore(this.app);
@@ -156,6 +159,15 @@ class ViewerApp {
         // Document loaded, specifying document for the viewer and the linkService.
         this.viewer.setDocument(pdfDocument);
         return pdfDocument;
+    }
+
+    /**
+     * Called when the viewer container is resized.
+     * @param {Array<ResizeObserverEntry>} entries 
+     */
+    _onResize(entries) {
+        this.viewer.currentScaleValue = "page-fit";
+        this.viewer.update();
     }
 }
 

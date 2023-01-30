@@ -14,6 +14,8 @@ function clamp(value, min, max) {
 }
 
 class AdminApp extends ViewerApp {
+    /** @type {HTMLElement} */
+    toolbarContainer;
     /** @type {HTMLInputElement} */
     deckNameInput;
     /** @type {HTMLInputElement} */
@@ -35,7 +37,7 @@ class AdminApp extends ViewerApp {
     /** @type {import('firebase/auth').Auth} */
     auth;
 
-    constructor(viewerContainer, deckNameInput, pageNumberInput, pagesCountSpan, prevPageButton, nextPageButton, emailField, loginButton, logoutButton, firebaseConfig) {
+    constructor(viewerContainer, toolbarContainer, deckNameInput, pageNumberInput, pagesCountSpan, prevPageButton, nextPageButton, emailField, loginButton, logoutButton, firebaseConfig) {
         super(viewerContainer, firebaseConfig);
 
         // Firestore references
@@ -43,6 +45,7 @@ class AdminApp extends ViewerApp {
         // Auth reference
         this.auth = getAuth(this.app);
 
+        this.toolbarContainer = toolbarContainer;
         this.deckNameInput = deckNameInput;
         this.pageNumberInput = pageNumberInput;
         this.pagesCountSpan = pagesCountSpan;
@@ -198,12 +201,18 @@ class AdminApp extends ViewerApp {
             console.error("Error signing out: ", error);
         });
     }
+
+    _onResize() {
+        this.viewerContainer.style.top = this.toolbarContainer.offsetHeight;
+        super._onResize();
+    }
 }
 
 // Main
 window.addEventListener("DOMContentLoaded", () => {
     const app = new AdminApp(
         document.getElementById("viewerContainer"),
+        document.getElementById("toolbarContainer"),
         document.getElementById("deckName"),
         document.getElementById("pageNumber"),
         document.getElementById("pagesCount"),

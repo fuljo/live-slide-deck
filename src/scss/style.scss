@@ -11,8 +11,7 @@ header {
 }
 
 #viewerContainer.with-toolbar {
-    // 2 * (toolbar-padding + button-padding + button-border) + button-line-height * button-font-size
-    top: calc(2 * (1rem + 0.375rem + 1px) + 1.5 * 1rem);
+    top: 0;
     bottom: 0;
     left: 0;
     right: 0;
