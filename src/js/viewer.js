@@ -155,7 +155,6 @@ class ViewerApp {
         const pdfDocument = await loadingTask.promise;
         // Document loaded, specifying document for the viewer and the linkService.
         this.viewer.setDocument(pdfDocument);
-        this.viewer.setDocument(pdfDocument, null);
         return pdfDocument;
     }
 }
