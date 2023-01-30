@@ -1,7 +1,7 @@
-import { firebaseConfig } from './common';
-
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+
+import { firebaseConfig } from './common';
 
 import 'bootstrap/scss/bootstrap.scss';
 import 'bootstrap-icons/font/bootstrap-icons.css';

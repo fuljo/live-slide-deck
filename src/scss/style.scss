@@ -37,11 +37,7 @@ header {
     -moz-appearance: textfield;
     appearance: textfield;
     text-align: center;
-    // width: 4rem;
-}
-
-#pageCount {
-    // padding: 0 1rem;
+    max-width: 4rem;
 }
 
 input[type='number']::-webkit-inner-spin-button,

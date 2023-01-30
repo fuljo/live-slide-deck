@@ -1,18 +1,12 @@
-import 'bootstrap/scss/bootstrap.scss';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import 'pdfjs-dist/web/pdf_viewer.css';
-import '../scss/style.scss';
-
-import { pdfjsLib, pdfjsViewer, ViewerApp } from './index.js';
 import { collection, doc, getDocs, updateDoc } from 'firebase/firestore';
-
-import { firebaseConfig } from './common';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
 
-if (!pdfjsLib.getDocument || !pdfjsViewer.PDFSinglePageViewer) {
-    // eslint-disable-next-line no-alert
-    alert("Please provide the `pdfjs-dist` library");
-}
+import { firebaseConfig } from './common';
+import { pdfjsLib, pdfjsViewer, ViewerApp } from './viewer';
+
+import 'bootstrap/scss/bootstrap.scss';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import '../scss/style.scss';
 
 function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);
@@ -102,8 +96,24 @@ class AdminApp extends ViewerApp {
      * @param {string} deckName.
      */
     set currentDeck(deckName) {
-        this._currentDeck = deckName;
-        this.deckNameInput.value = deckName;
+        if (deckName === this._currentDeck) {
+            return;
+        }
+        // Load new deck locally
+        this._updateDeck(deckName).then(() => {
+            this._currentDeck = deckName;
+            this.currentPageNumber = 1;
+            this.deckNameInput.value = deckName;
+            this.pagesCountSpan.textContent = this.viewer.pagesCount;
+        }).catch((error) => {
+            console.error("Error loading document: ", error);
+        });
+        // Update Firestore
+        if (this.auth.currentUser != null) {
+            updateDoc(this.presenterStateRef, { currentDeck: deckName, currentPageNumber: 1 }).catch((error) => {
+                console.error("Error updating deck name: ", error);
+            });
+        }
     }
 
     /** Current page number */
@@ -116,9 +126,18 @@ class AdminApp extends ViewerApp {
      * @param {number} pageNumber
      */
     set currentPageNumber(pageNumber) {
-        this._currentPageNumber = pageNumber;
-        this.pageNumberInput.value = pageNumber;
-        this.viewer.currentPageNumber = pageNumber; // this only works if the viewer has finished initializing.
+        pageNumber = clamp(pageNumber, 1, this.viewer.pagesCount || 1);
+        if (Number.isInteger(pageNumber) && pageNumber != this.currentPageNumber) {
+            this._currentPageNumber = pageNumber;
+            this.pageNumberInput.value = pageNumber;
+            this.viewer.currentPageNumber = pageNumber; // this only works if the viewer has finished initializing.
+            // Update Firestore
+            if (this.auth.currentUser != null) {
+                updateDoc(this.presenterStateRef, { currentPageNumber: pageNumber }).catch((error) => {
+                    console.error("Error updating page number: ", error);
+                });
+            }
+        }
     }
 
     _onAuthStateChanged(user) {
@@ -137,30 +156,6 @@ class AdminApp extends ViewerApp {
     }
 
     /**
-     * Handle a change in the presenter's data.
-     * @param {DocumentSnapshot<import('firebase/firestore').DocumentData>} doc the changed firestore document.
-     */
-    _onSnapshot(doc) {
-        const data = doc.data();
-        const remoteDeck = data.currentDeck;
-        const remotePage = parseInt(data.currentPageNumber);
-
-        if (this.currentDeck != remoteDeck) {
-            // Load new deck
-            this._updateDeck(remoteDeck).then(() => {
-                this.currentDeck = remoteDeck;
-                this.pagesCountSpan.textContent = this.viewer.pagesCount;
-            }).catch((error) => {
-                console.error("Error loading document: ", error);
-            });
-        }
-        if (this.currentPageNumber != remotePage) {
-            // Update current page
-            this.currentPageNumber = remotePage;
-        }
-    }
-
-    /**
      * Handle a change of the deck name.
      * @param {Event} event 
      */
@@ -168,11 +163,7 @@ class AdminApp extends ViewerApp {
         const deckName = event.target.value;
         if (deckName != null && deckName != this.currentDeck) {
             this.currentDeck = deckName;
-            if (this.auth.currentUser != null) {
-                updateDoc(this.presenterStateRef, { currentDeck: deckName }).catch((error) => {
-                    console.error("Error updating deck name: ", error);
-                });
-            }
+            this.currentPageNumber = 1;
         }
     }
 
@@ -181,15 +172,7 @@ class AdminApp extends ViewerApp {
      * @param {Event} event 
      */
     _onPageNumberInputChange(event) {
-        const pageNumber = parseInt(event.target.value);
-        if (Number.isInteger(pageNumber) && pageNumber != this.currentPageNumber) {
-            this.currentPageNumber = pageNumber;
-            if (this.auth.currentUser != null) {
-                updateDoc(this.presenterStateRef, { currentPageNumber: pageNumber }).catch((error) => {
-                    console.error("Error updating page number: ", error);
-                });
-            }
-        }
+        this.currentPageNumber = parseInt(event.target.value);
     }
 
     /**
@@ -201,15 +184,7 @@ class AdminApp extends ViewerApp {
         if (event instanceof InputEvent) {
             event.preventDefault();
         }
-        const pageNumber = clamp(this.currentPageNumber + delta, 1, this.viewer.pagesCount);
-        if (Number.isInteger(pageNumber) && pageNumber != this.currentPageNumber) {
-            this.currentPageNumber = pageNumber;
-            if (this.auth.currentUser != null) {
-                updateDoc(this.presenterStateRef, { currentPageNumber: pageNumber }).catch((error) => {
-                    console.error("Error updating page number: ", error);
-                });
-            }
-        }
+        this.currentPageNumber += delta;
     }
 
     _onLoginButton(event) {
