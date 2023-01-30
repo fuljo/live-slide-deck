@@ -1,0 +1,7 @@
+[
+    {
+      "origin": ["*", "swerc-presenter.firebaseapp.com"],
+      "method": ["GET"],
+      "maxAgeSeconds": 3600
+    }
+]

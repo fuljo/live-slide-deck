@@ -3,7 +3,8 @@ import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer';
 import 'pdfjs-dist/web/pdf_viewer.css';
 
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, getDoc, onSnapshot, Firestore, DocumentSnapshot } from "firebase/firestore";
+import { getFirestore, doc, onSnapshot, Firestore, DocumentSnapshot } from "firebase/firestore";
+import { getStorage, getDownloadURL, ref } from "firebase/storage";
 
 if (!pdfjsLib.getDocument || !pdfjsViewer.PDFSinglePageViewer) {
     // eslint-disable-next-line no-alert
@@ -33,6 +34,8 @@ class ViewerApp {
     app;
     /** @type {Firestore} */
     db;
+    /** @type {import('firebase/storage').FirebaseStorage} */
+    storage;
     /**
      * Name of the current deck.
      * @type {string}
@@ -77,6 +80,7 @@ class ViewerApp {
         // Initialize the Firebase app
         this.app = initializeApp(firebaseConfig);
         this.db = getFirestore(this.app);
+        this.storage = getStorage(this.app);
 
         // Set callback for data changes
         const unsub = onSnapshot(doc(this.db, "presenter", "state"), this._onSnapshot.bind(this));
@@ -126,12 +130,12 @@ class ViewerApp {
      * @param {string} deck the name of the deck to load. 
      */
     async _updateDeck(deck) {
-        const deckRef = doc(this.db, 'decks', deck);
-        const deckDoc = await getDoc(deckRef);
-        if (!deckDoc.exists()) {
-            throw new Error(`Deck ${deck} does not exist.`);
-        } else {
-            await this.loadDocument(deckDoc.data().url);
+        const deckRef = ref(this.storage, `decks/${deck}.pdf`);
+        try {
+            const url = await getDownloadURL(deckRef);
+            await this.loadDocument(url);
+        } catch (error) {
+            console.error("Error getting deck: ", error);
         }
     }
 

@@ -1,8 +1,9 @@
-import { collection, doc, getDocs, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
+import { ref, listAll } from 'firebase/storage';
 
 import { firebaseConfig } from './common';
-import { pdfjsLib, pdfjsViewer, ViewerApp } from './viewer';
+import { ViewerApp } from './viewer';
 
 import 'bootstrap/scss/bootstrap.scss';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -71,11 +72,12 @@ class AdminApp extends ViewerApp {
         });
 
         // Populate deck names
-        getDocs(collection(this.db, "decks")).then((querySnapshot) => {
-            querySnapshot.forEach((doc) => {
+        listAll(ref(this.storage, "decks")).then((res) => {
+            res.items.forEach((itemRef) => {
                 const option = document.createElement("option");
-                option.value = doc.id;
-                option.textContent = doc.id;
+                const deckName = itemRef.name.replace(/\.pdf$/, "");
+                option.value = deckName;
+                option.textContent = deckName;
                 this.deckNameInput.appendChild(option);
             });
         });
