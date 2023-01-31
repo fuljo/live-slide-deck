@@ -101,24 +101,17 @@ class AdminApp extends ViewerApp {
      * @param {string} deckName.
      */
     set currentDeck(deckName) {
-        if (deckName === this._currentDeck) {
+        if (deckName === this.currentDeck) {
             return;
         }
         // Load new deck locally
         this._updateDeck(deckName).then(() => {
             this._currentDeck = deckName;
-            this.currentPageNumber = 1;
             this.deckNameInput.value = deckName;
             this.pagesCountSpan.textContent = this.viewer.pagesCount;
         }).catch((error) => {
             console.error("Error loading document: ", error);
         });
-        // Update Firestore
-        if (this.auth.currentUser != null) {
-            updateDoc(this.presenterStateRef, { currentDeck: deckName, currentPageNumber: 1 }).catch((error) => {
-                console.error("Error updating deck name: ", error);
-            });
-        }
     }
 
     /** Current page number */
@@ -131,15 +124,31 @@ class AdminApp extends ViewerApp {
      * @param {number} pageNumber
      */
     set currentPageNumber(pageNumber) {
-        pageNumber = clamp(pageNumber, 1, this.viewer.pagesCount || 1);
-        if (Number.isInteger(pageNumber) && pageNumber != this.currentPageNumber) {
+        if (Number.isInteger(pageNumber) && pageNumber > 0) {
             this._currentPageNumber = pageNumber;
             this.pageNumberInput.value = pageNumber;
             this.viewer.currentPageNumber = pageNumber; // this only works if the viewer has finished initializing.
-            // Update Firestore
-            if (this.auth.currentUser != null) {
-                updateDoc(this.presenterStateRef, { currentPageNumber: pageNumber }).catch((error) => {
-                    console.error("Error updating page number: ", error);
+        }
+    }
+
+    /**
+     * Update one or more parameters of the remote state.
+     * @param {string} deckName 
+     * @param {number} pageNumber 
+     */
+    updateRemoteState({ deckName, pageNumber } = {}) {
+        if (this.auth.currentUser != null) {
+            let state = {};
+            if (deckName != undefined && deckName !== this.currentDeck) {
+                state.currentDeck = deckName;
+            }
+            if (Number.isInteger(pageNumber) && pageNumber !== this.currentPageNumber) {
+                pageNumber = clamp(pageNumber, 1, this.viewer.pagesCount ?? 1);
+                state.currentPageNumber = pageNumber;
+            }
+            if (Object.keys(state).length > 0) {
+                updateDoc(this.presenterStateRef, state).catch((error) => {
+                    console.error("Error updating remote state: ", error);
                 });
             }
         }
@@ -166,10 +175,7 @@ class AdminApp extends ViewerApp {
      */
     _onDeckNameInputChange(event) {
         const deckName = event.target.value;
-        if (deckName != null && deckName != this.currentDeck) {
-            this.currentDeck = deckName;
-            this.currentPageNumber = 1;
-        }
+        this.updateRemoteState({ deckName: deckName, pageNumber: 1 });
     }
 
     /**
@@ -177,7 +183,8 @@ class AdminApp extends ViewerApp {
      * @param {Event} event 
      */
     _onPageNumberInputChange(event) {
-        this.currentPageNumber = parseInt(event.target.value);
+        let pageNumber = parseInt(event.target.value);
+        this.updateRemoteState({ pageNumber: pageNumber });
     }
 
     /**
@@ -189,7 +196,8 @@ class AdminApp extends ViewerApp {
         if (event instanceof InputEvent) {
             event.preventDefault();
         }
-        this.currentPageNumber += delta;
+        let pageNumber = this.currentPageNumber + delta;
+        this.updateRemoteState({ pageNumber: pageNumber });
     }
 
     _onLoginButton(event) {

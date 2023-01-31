@@ -74,7 +74,7 @@ class ViewerApp {
             // Fit the page into the frame.
             this.viewer.currentScaleValue = "page-fit";
             // Go to the current page.
-            this.viewer.currentPageNumber = this.currentPageNumber || 1;
+            this.viewer.currentPageNumber = this.currentPageNumber ?? 1;
         });
 
         this.resizeObserver = new ResizeObserver(this._onResize.bind(this));
