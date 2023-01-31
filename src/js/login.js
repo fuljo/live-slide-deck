@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect } from 'firebase/auth';
 
 import { firebaseConfig } from './common';
 
@@ -11,9 +11,23 @@ import '../scss/login.scss';
 window.addEventListener("DOMContentLoaded", () => {
     const loginForm = document.getElementById("loginForm");
     const loginButton = document.getElementById("loginButton");
+    const googleLoginButton = document.getElementById("googleLoginButton");
+    const loginMessage = document.getElementById("loginMessage");
     const loginError = document.getElementById("loginError");
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            // Signed in
+            loginMessage.textContent = `Signed in as ${user.email}. Redirecting...`;
+            loginMessage.hidden = false;
+            loginForm.hidden = true;
+            loginError.hidden = true;
+            window.location.replace("admin.html");
+        }
+    });
 
     loginButton.addEventListener("click", async (e) => {
         e.preventDefault();
@@ -21,17 +35,21 @@ window.addEventListener("DOMContentLoaded", () => {
         const email = loginForm.email.value;
         const password = loginForm.password.value;
 
-        const auth = getAuth(app);
-        signInWithEmailAndPassword(auth, email, password).then((userCredential) => {
-            // Signed in
-            const user = userCredential.user;
-            loginError.hidden = true;
-            window.location.replace("admin.html");
-        })
-        .catch((error) => {
-            const errorCode = error.code;
+        signInWithEmailAndPassword(auth, email, password).catch((error) => {
             const errorMessage = error.message;
-            loginError.textContent = `${errorCode}: ${errorMessage}`;
+            loginError.textContent = error.message;
+            loginError.hidden = false;
+        });
+    });
+
+    googleLoginButton.addEventListener("click", async (e) => {
+        e.preventDefault();
+
+        const provider = new GoogleAuthProvider();
+        auth.useDeviceLanguage();
+
+        signInWithRedirect(auth, provider).catch((error) => {
+            loginError.textContent = error.message;
             loginError.hidden = false;
         });
     });
