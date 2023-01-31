@@ -161,11 +161,21 @@ class AdminApp extends ViewerApp {
             this.emailField.hidden = false;
             this.loginButton.hidden = true;
             this.logoutButton.hidden = false;
+
+            this.deckNameInput.disabled = false;
+            this.pageNumberInput.disabled = false;
+            this.prevPageButton.disabled = false;
+            this.nextPageButton.disabled = false;
         } else {
             // User is signed out.
             this.emailField.hidden = true;
             this.loginButton.hidden = false;
             this.logoutButton.hidden = true;
+
+            this.deckNameInput.disabled = true;
+            this.pageNumberInput.disabled = true;
+            this.prevPageButton.disabled = true;
+            this.nextPageButton.disabled = true;
         }
     }
 
