@@ -80,6 +80,15 @@ class ViewerApp {
         this.resizeObserver = new ResizeObserver(this._onResize.bind(this));
         this.resizeObserver.observe(this.viewerContainer);
 
+        // Fulscreen on double click
+        this.viewerContainer.addEventListener("dblclick", (event) => {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                document.documentElement.requestFullscreen();
+            }
+        });
+
         // Initialize the Firebase app
         this.app = initializeApp(firebaseConfig);
         this.db = getFirestore(this.app);
