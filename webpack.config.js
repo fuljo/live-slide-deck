@@ -1,6 +1,7 @@
 const webpack = require("webpack"); // eslint-disable-line no-unused-vars
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const Dotenv = require("dotenv-webpack");
 
@@ -33,6 +34,7 @@ module.exports = {
             template: "src/login.html",
             chunks: ["login"],
         }),
+        new MiniCssExtractPlugin(),
         new CopyWebpackPlugin({
             patterns: [
                 {
@@ -55,16 +57,14 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.(css)$/,
-                use: ['style-loader', 'css-loader'],
-            },
-            {
-                test: /\.(scss)$/i,
+                test: /\.s?css$/i,
                 use: [
                     {
-                        loader: 'style-loader'
+                        // Save the CSS to a separate file
+                        loader: MiniCssExtractPlugin.loader
                     },
                     {
+                        // Load CSS from JS
                         loader: 'css-loader'
                     },
                     {
@@ -90,6 +90,6 @@ module.exports = {
         ]
     },
     optimization: {
-        runtimeChunk: "single",
+        splitChunks: {},
     },
 };
