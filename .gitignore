@@ -129,8 +129,9 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Firebase aliases
+# Firebase
 .firebaserc
+.firebase
 
 # Samples
 *.pdf
