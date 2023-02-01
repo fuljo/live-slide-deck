@@ -3,7 +3,7 @@ import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer';
 import 'pdfjs-dist/web/pdf_viewer.css';
 
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, onSnapshot, Firestore, DocumentSnapshot } from "firebase/firestore";
+import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 import { getStorage, getDownloadURL, ref } from "firebase/storage";
 
 if (!pdfjsLib.getDocument || !pdfjsViewer.PDFSinglePageViewer) {
@@ -81,7 +81,7 @@ class ViewerApp {
         this.resizeObserver.observe(this.viewerContainer);
 
         // Fulscreen on double click
-        this.viewerContainer.addEventListener("dblclick", (event) => {
+        this.viewerContainer.addEventListener("dblclick", (_event) => {
             if (document.fullscreenElement) {
                 document.exitFullscreen();
             } else {
@@ -95,7 +95,7 @@ class ViewerApp {
         this.storage = getStorage(this.app);
 
         // Set callback for data changes
-        const unsub = onSnapshot(doc(this.db, "presenter", "state"), this._onSnapshot.bind(this));
+        onSnapshot(doc(this.db, "presenter", "state"), this._onSnapshot.bind(this));
     }
 
     get currentDeck() {
@@ -174,7 +174,7 @@ class ViewerApp {
      * Called when the viewer container is resized.
      * @param {Array<ResizeObserverEntry>} entries 
      */
-    _onResize(entries) {
+    _onResize(_entries) {
         this.viewer.currentScaleValue = "page-fit";
         this.viewer.update();
     }

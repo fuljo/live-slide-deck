@@ -9,5 +9,5 @@ window.addEventListener("DOMContentLoaded", () => {
     const viewerContainer = document.getElementById("viewerContainer");
 
     // Create and initialize the viewer app
-    const app = new ViewerApp(viewerContainer, firebaseConfig);
+    new ViewerApp(viewerContainer, firebaseConfig);
 });

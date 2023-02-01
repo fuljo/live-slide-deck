@@ -36,7 +36,6 @@ window.addEventListener("DOMContentLoaded", () => {
         const password = loginForm.password.value;
 
         signInWithEmailAndPassword(auth, email, password).catch((error) => {
-            const errorMessage = error.message;
             loginError.textContent = error.message;
             loginError.hidden = false;
         });

@@ -13,6 +13,9 @@ function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);
 }
 
+/**
+ * Admin app.
+ */
 class AdminApp extends ViewerApp {
     /** @type {HTMLElement} */
     toolbarContainer;
@@ -210,11 +213,11 @@ class AdminApp extends ViewerApp {
         this.updateRemoteState({ pageNumber: pageNumber });
     }
 
-    _onLoginButton(event) {
+    _onLoginButton(_event) {
         window.location.replace("/login.html");
     }
 
-    _onLogoutButton(event) {
+    _onLogoutButton(_event) {
         signOut(this.auth).catch((error) => {
             console.error("Error signing out: ", error);
         });
@@ -228,7 +231,7 @@ class AdminApp extends ViewerApp {
 
 // Main
 window.addEventListener("DOMContentLoaded", () => {
-    const app = new AdminApp(
+    new AdminApp(
         document.getElementById("viewerContainer"),
         document.getElementById("toolbarContainer"),
         document.getElementById("deckName"),
