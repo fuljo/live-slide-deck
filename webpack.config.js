@@ -11,6 +11,7 @@ module.exports = {
         main: "./src/js/index.js",
         admin: "./src/js/admin.js",
         login: "./src/js/login.js",
+        "404": "./src/js/404.js",
         "pdf.worker": "pdfjs-dist/build/pdf.worker.entry",
     },
     devtool: "source-map",
@@ -33,6 +34,11 @@ module.exports = {
             filename: "login.html",
             template: "src/login.html",
             chunks: ["login"],
+        }),
+        new HtmlWebpackPlugin({
+            filename: "404.html",
+            template: "src/404.html",
+            chunks: ["404"],
         }),
         new MiniCssExtractPlugin(),
         new CopyWebpackPlugin({
