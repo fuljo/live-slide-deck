@@ -1,13 +1,14 @@
-# SWERC Presenter
+# Live Slide Deck
 
 Present PDFs live on the web.
 
-This web application allows you to upload PDF documents and present them online to any number of users.
+This web application allows you to upload PDF documents and present them online to any number of users. The viewers will see the slides advance in real time.
 
 ## Features:
 - **Admin view**: select a slide deck and advance the presentation.
 - **Real time sync**: the users will see the slides changing in real time.
 - Access control: only authorized users can control the presentation through the admin panel.
+- Multiple decks: you can upload multiple decks and select the one to show at each time.
 
 ## Getting started
 
@@ -15,8 +16,8 @@ The app is entirely built for [Firebase](firebase.google.com).
 
 1. Clone the repository
    ```sh
-   git clone https://github.com/fuljo/swerc-presenter
-   cd swerc-presenter
+   git clone https://github.com/fuljo/live-slide-deck
+   cd live-slide-deck
    ```
 
 ### Setting up Firebase
@@ -145,6 +146,7 @@ I ([fuljo](https://github.com/fuljo)) quickly hacked this app for the [SWERC 202
 
 - [ ]  Uploading slide decks through the Admin UI
 - [ ]  Managing the users from the UI
+- [ ]  Multiple presentation sessions
 
 If you wish to contribute please open a *Pull Request*.
 
