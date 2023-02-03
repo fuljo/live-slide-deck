@@ -79,7 +79,15 @@ module.exports = {
                         options: {
                             postcssOptions: {
                                 plugins: () => [
-                                    require('autoprefixer')
+                                    "autoprefixer",
+                                    [
+                                        "@fullhuman/postcss-purgecss",
+                                        {
+                                            content: [
+                                                "./src/**/*.html",
+                                            ]
+                                        }
+                                    ]
                                 ]
                             }
                         }

@@ -3,8 +3,6 @@ import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithRedi
 
 import { firebaseConfig } from './common';
 
-import 'bootstrap/scss/bootstrap.scss';
-import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../scss/login.scss';
 
 // Main

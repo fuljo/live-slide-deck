@@ -1,7 +1,7 @@
 import { firebaseConfig } from './common';
 import { ViewerApp } from './viewer';
 
-import '../scss/style.scss';
+import '../scss/viewer.scss';
 
 // Main
 window.addEventListener("DOMContentLoaded", () => {

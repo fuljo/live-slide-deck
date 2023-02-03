@@ -5,9 +5,7 @@ import { ref, listAll } from 'firebase/storage';
 import { firebaseConfig } from './common';
 import { ViewerApp } from './viewer';
 
-import 'bootstrap/scss/bootstrap.scss';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import '../scss/style.scss';
+import '../scss/admin.scss';
 
 function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);

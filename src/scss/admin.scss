@@ -1,13 +1,10 @@
+@import "~bootstrap/scss/bootstrap";
+@import "~bootstrap-icons/font/bootstrap-icons.css";
+@import "viewer.scss";
+
 header {
     position: relative;
     z-index: 1;
-}
-
-#viewerContainer {
-    overflow: auto;
-    position: absolute;
-    outline: none;
-    z-index: 0;
 }
 
 #viewerContainer.with-toolbar {
@@ -15,17 +12,6 @@ header {
     bottom: 0;
     left: 0;
     right: 0;
-}
-
-#viewerContainer.fullscreen {
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-}
-
-.pdfViewer.removePageBorders .page {
-    margin: 0 auto 0;
 }
 
 #logo {
