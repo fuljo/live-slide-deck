@@ -69,6 +69,8 @@ class AdminApp extends ViewerApp {
             switch (e.key) {
                 case 'ArrowLeft': this._onPageChangeButton(-1, e); break;
                 case 'ArrowRight': this._onPageChangeButton(+1, e); break;
+                case 'PageUp': this._onPageChangeButton(-1, e); break;
+                case 'PageDown': this._onPageChangeButton(+1, e); break;
             }
         }, false);
 
