@@ -50,8 +50,9 @@ class ViewerApp {
      * We suppose that the DOM has already been loaded so we can query elements.
      * @param {HTMLElement} viewerContainer 
      * @param {Object} firebaseConfig 
+     * @param {boolean} useWakeLock
      */
-    constructor(viewerContainer, firebaseConfig) {
+    constructor(viewerContainer, firebaseConfig, useWakeLock) {
         this.viewerContainer = viewerContainer;
 
         this.eventBus = new pdfjsViewer.EventBus();
@@ -88,6 +89,11 @@ class ViewerApp {
                 document.documentElement.requestFullscreen();
             }
         });
+
+        // Wake lock
+        if (useWakeLock) {
+            this._requestWakeLock();
+        }
 
         // Initialize the Firebase app
         this.app = initializeApp(firebaseConfig);
@@ -177,6 +183,25 @@ class ViewerApp {
     _onResize(_entries) {
         this.viewer.currentScaleValue = "page-fit";
         this.viewer.update();
+    }
+
+    /**
+     * Request a wake lock.
+     */
+    async _requestWakeLock() {
+        if ("wakeLock" in navigator) {
+            try {
+                this.wakeLock = await navigator.wakeLock.request("screen");
+                this.wakeLock.addEventListener("release", () => {
+                    console.log("Wake Lock was released");
+                });
+                console.log("Wake Lock is active");
+            } catch (err) {
+                console.error(`${err.name}, ${err.message}`);
+            }
+        } else {
+            console.warn("Wake Lock API not supported");
+        }
     }
 }
 

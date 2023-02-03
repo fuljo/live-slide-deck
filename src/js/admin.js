@@ -39,9 +39,11 @@ class AdminApp extends ViewerApp {
     presenterStateRef;
     /** @type {import('firebase/auth').Auth} */
     auth;
+    /** @type {boolean} */
+    useWakeLock;
 
-    constructor(viewerContainer, toolbarContainer, deckNameInput, pageNumberInput, pagesCountSpan, prevPageButton, nextPageButton, emailField, loginButton, logoutButton, firebaseConfig) {
-        super(viewerContainer, firebaseConfig);
+    constructor(viewerContainer, toolbarContainer, deckNameInput, pageNumberInput, pagesCountSpan, prevPageButton, nextPageButton, emailField, loginButton, logoutButton, firebaseConfig, useWakeLock) {
+        super(viewerContainer, firebaseConfig, useWakeLock);
 
         // Firestore references
         this.presenterStateRef = doc(this.db, "presenter", "state");
@@ -233,6 +235,7 @@ class AdminApp extends ViewerApp {
 
 // Main
 window.addEventListener("DOMContentLoaded", () => {
+    const useWakeLock = false;
     new AdminApp(
         document.getElementById("viewerContainer"),
         document.getElementById("toolbarContainer"),
@@ -244,6 +247,7 @@ window.addEventListener("DOMContentLoaded", () => {
         document.getElementById("email"),
         document.getElementById("login"),
         document.getElementById("logout"),
-        firebaseConfig
+        firebaseConfig,
+        useWakeLock,
     );
 });

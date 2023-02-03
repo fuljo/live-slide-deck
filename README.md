@@ -9,6 +9,7 @@ This web application allows you to upload PDF documents and present them online 
 - **Real time sync**: the users will see the slides changing in real time.
 - Access control: only authorized users can control the presentation through the admin panel.
 - Multiple decks: you can upload multiple decks and select the one to show at each time.
+- Wake Lock: prevent the viewer's screen from dimming or locking during the presentation (only on [supported browsers](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API#browser_compatibility))
 
 ## Getting started
 

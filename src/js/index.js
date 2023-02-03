@@ -9,5 +9,6 @@ window.addEventListener("DOMContentLoaded", () => {
     const viewerContainer = document.getElementById("viewerContainer");
 
     // Create and initialize the viewer app
-    new ViewerApp(viewerContainer, firebaseConfig);
+    const useWakeLock = true;
+    new ViewerApp(viewerContainer, firebaseConfig, useWakeLock);
 });
