@@ -228,7 +228,7 @@ class AdminApp extends ViewerApp {
     }
 
     _onResize() {
-        this.viewerContainer.style.top = this.toolbarContainer.offsetHeight;
+        this.viewerContainer.style.top = `${this.toolbarContainer.offsetHeight}px`;
         super._onResize();
     }
 }
