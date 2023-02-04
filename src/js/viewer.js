@@ -5,6 +5,7 @@ import 'pdfjs-dist/web/pdf_viewer.css';
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 import { getStorage, getDownloadURL, ref } from "firebase/storage";
+import { AnnotationMode, AnnotationEditorType } from 'pdfjs-dist';
 
 if (!pdfjsLib.getDocument || !pdfjsViewer.PDFSinglePageViewer) {
     // eslint-disable-next-line no-alert
@@ -19,8 +20,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 const CMAP_URL = "cmaps/";
 const CMAP_PACKED = true;
 
-const ENABLE_XFA = true;
-
 class ViewerApp {
     /** @type {HTMLElement} */
     viewerContainer;
@@ -28,8 +27,6 @@ class ViewerApp {
     viewer;
     /** @type {pdfjsViewer.EventBus} */
     eventBus;
-    /** @type {pdfjsViewer.PDFLinkService} */
-    pdfLinkService;
     /** @type {import('firebase/app').FirebaseApp} */
     app;
     /** @type {Firestore} */
@@ -57,19 +54,13 @@ class ViewerApp {
 
         this.eventBus = new pdfjsViewer.EventBus();
 
-        // Enable hyperlinks within PDF files.
-        // TODO: debug hyperlinks.
-        this.pdfLinkService = new pdfjsViewer.PDFLinkService({
-            eventBus: this.eventBus,
-        });
-
         this.viewer = new pdfjsViewer.PDFSinglePageViewer({
             container: this.viewerContainer,
             eventBus: this.eventBus,
-            linkService: this.pdfLinkService,
             removePageBorders: true,
+            annotationMode: AnnotationMode.DISABLE,
+            annotationEditorMode: AnnotationEditorType.DISABLE,
         });
-        this.pdfLinkService.setViewer(this.viewer);
 
         this.eventBus.on("pagesinit", () => {
             // Fit the page into the frame.
@@ -168,10 +159,9 @@ class ViewerApp {
             url,
             cMapUrl: CMAP_URL,
             cMapPacked: CMAP_PACKED,
-            enableXfa: ENABLE_XFA,
         });
         const pdfDocument = await loadingTask.promise;
-        // Document loaded, specifying document for the viewer and the linkService.
+        // Document loaded, specifying document for the viewer.
         this.viewer.setDocument(pdfDocument);
         return pdfDocument;
     }
