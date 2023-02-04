@@ -180,6 +180,15 @@ class ViewerApp {
      */
     async _requestWakeLock() {
         if ("wakeLock" in navigator) {
+            document.addEventListener("visibilitychange", this._handleVisibilityChange.bind(this));
+            this._handleVisibilityChange();
+        } else {
+            console.warn("Wake Lock API not supported");
+        }
+    }
+
+    async _handleVisibilityChange() {
+        if (document.visibilityState === "visible") {
             try {
                 this.wakeLock = await navigator.wakeLock.request("screen");
                 this.wakeLock.addEventListener("release", () => {
@@ -190,7 +199,7 @@ class ViewerApp {
                 console.error(`${err.name}, ${err.message}`);
             }
         } else {
-            console.warn("Wake Lock API not supported");
+            this.wakeLock.release();
         }
     }
 }
