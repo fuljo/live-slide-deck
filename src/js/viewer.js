@@ -130,8 +130,9 @@ class ViewerApp {
     _onSnapshot(doc) {
         const data = doc.data();
 
-        this.currentDeck = data.currentDeck;
-        this.currentPageNumber = parseInt(data.currentPageNumber);
+        const deckName = data.currentDeck;
+        this.currentDeck = deckName;
+        this.currentPageNumber = parseInt(data.currentPageNumber[deckName] ?? 1);
     }
 
     /**

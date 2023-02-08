@@ -142,14 +142,14 @@ class AdminApp extends ViewerApp {
      * @param {number} pageNumber 
      */
     updateRemoteState({ deckName, pageNumber } = {}) {
-        if (this.auth.currentUser != null) {
+        if (this.currentDeck && this.auth.currentUser != null) {
             let state = {};
             if (deckName != undefined && deckName !== this.currentDeck) {
                 state.currentDeck = deckName;
             }
             if (Number.isInteger(pageNumber) && pageNumber !== this.currentPageNumber) {
                 pageNumber = clamp(pageNumber, 1, this.viewer.pagesCount ?? 1);
-                state.currentPageNumber = pageNumber;
+                state[`currentPageNumber.${this._currentDeck}`] = pageNumber;
             }
             if (Object.keys(state).length > 0) {
                 updateDoc(this.presenterStateRef, state).catch((error) => {
@@ -190,7 +190,7 @@ class AdminApp extends ViewerApp {
      */
     _onDeckNameInputChange(event) {
         const deckName = event.target.value;
-        this.updateRemoteState({ deckName: deckName, pageNumber: 1 });
+        this.updateRemoteState({ deckName: deckName });
     }
 
     /**

@@ -10,6 +10,7 @@ This web application allows you to upload PDF documents and present them online 
 - Access control: only authorized users can control the presentation through the admin panel.
 - Multiple decks: you can upload multiple decks and select the one to show at each time.
 - Wake Lock: prevent the viewer's screen from dimming or locking during the presentation (only on [supported browsers](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API#browser_compatibility))
+- Preserve last shown page when switching decks.
 
 ## Getting started
 
@@ -77,7 +78,7 @@ Authentication is only needed to sign-in the presenters (those who control the p
    - Create a collection called `presenter`.
    - Inside it, create a document called `state` with two fields:
      - `currentDeck: string` set to the name of your slide deck, without the `.pdf` extension.
-     - `currentPageNumber: number = 1`.
+     - `currentPageNumber: map = {}}` -- this will hold a map that associates each slide deck with the current page number.
 
 ### Setting up the storage
 
