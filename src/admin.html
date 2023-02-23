@@ -13,9 +13,11 @@
         class="d-flex text-bg-dark align-items-baseline justify-content-center justify-content-md-between py-3 border-bottom">
         <div class="container-fluid row d-flex flex-wrap gy-2 gy-md-0 align-items-baseline">
             <div class="d-flex align-items-baseline col-md-4 gap-2 justify-content-center justify-content-md-start text-decoration-none">
-                <div class="d-flex col-md-8">
+                <div class="d-flex col-md-6">
                     <select id="deckName" class="form-select" disabled></select>
                 </div>
+                <button id="upload" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal" disabled><i class="bi bi-upload"></i></button>
+                <button id="delete" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteModal" disabled><i class="bi bi-trash"></i></button>
             </div>
 
             <div class="d-flex align-items-center justify-content-center col-md-4 gap-2">
@@ -35,6 +37,46 @@
     <div id="viewerContainer" class="with-toolbar">
         <div id="viewer" class="pdfViewer"></div>
     </div>
+
+    <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content text-bg-dark">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="uploadModalLabel">Upload slide deck</h1>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <label for="deckFile" class="form-label">Upload a new deck or replace an existing one</label>
+              <input class="form-control" type="file" id="deckFile" accept="application/pdf">
+              <div id="uploadError" class="alert alert-danger mt-2" role="alert" hidden></div>
+              <div id="uploadSuccess" class="alert alert-success mt-2" role="alert" hidden></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button id="submitUpload" type="button" class="btn btn-primary">Upload</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content text-bg-dark">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="deleteModalLabel">Delete slide deck</h1>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              Do you really want to delete the slide deck?
+              <div id="deleteError" class="alert alert-danger mt-2" role="alert" hidden></div>
+              <div id="deleteSuccess" class="alert alert-success mt-2" role="alert" hidden></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button id="confirmDelete" type="button" class="btn btn-primary">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
 </body>
 
 </html>
