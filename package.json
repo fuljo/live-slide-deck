@@ -30,6 +30,6 @@
     "bootstrap": "^5.2.3",
     "bootstrap-icons": "^1.10.3",
     "firebase": "^9.17.1",
-    "pdfjs-dist": "^3.3.122"
+    "pdfjs-dist": "^3.4.120"
   }
 }
