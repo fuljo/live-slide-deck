@@ -23,7 +23,7 @@ window.addEventListener("DOMContentLoaded", () => {
             loginMessage.hidden = false;
             loginForm.hidden = true;
             loginError.hidden = true;
-            window.location.replace("admin.html");
+            window.location.replace("admin");
         }
     });
 

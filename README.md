@@ -132,12 +132,12 @@ Now you need to locally store your app's configuration that Webpack can pick the
 
 ### Viewer page
 
-The viewer page is served at the root of the site (`index.html`).
+The viewer page is served at the root of the site (`index`).
 It features a full-page view of the current slide. Users can toggle the fullscreen mode by double-tapping the screen.
 
 ### Admin page
 
-The admin page is served at `/admin.html`. It allows authenticated admin users to:
+The admin page is served at `/admin`. It allows authenticated admin users to:
 - select the current slide deck with the top-left dropdown
 - change the current slide number with the center input field
 - go to the previous/next slide with the on-screen buttons or the keyboard arrows

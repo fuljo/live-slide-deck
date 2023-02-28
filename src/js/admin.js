@@ -342,7 +342,7 @@ class AdminApp extends ViewerApp {
     }
 
     _onLoginButton(_event) {
-        window.location.replace("/login.html");
+        window.location.replace("/login");
     }
 
     _onLogoutButton(_event) {

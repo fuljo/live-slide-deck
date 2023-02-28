@@ -12,7 +12,9 @@
     ],
     "predeploy": [
       "npm run build"
-    ]
+    ],
+    "cleanUrls": true,
+    "trailingSlash": false
   },
   "storage": {
     "rules": "storage.rules"
